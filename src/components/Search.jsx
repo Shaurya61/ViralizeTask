@@ -1,24 +1,31 @@
-import React, { useState } from "react";
-
+import React, { useState, useEffect } from "react";
 
 const Task2 = () => {
- const [username, setUsername] = useState("");
- const [userData, setUserData] = useState("");
+  const [username, setUsername] = useState("");
+  const [userData, setUserData] = useState(null);
+  const [error, setError] = useState(null);
 
- const handleSearch = async () => {
-    try {
-      const res = await fetch(`https://lichess.org/api/user/${username}`);
-      if (!res.ok) throw new Error("User not found");
-      const data = await res.json();
-      console.log(data);
-      setUserData(data);
-      // moving to task3 with username
-    } catch (error) {
-      console.error("Error searching user:", error);
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const res = await fetch(`https://lichess.org/api/user/${username}`);
+        if (!res.ok) throw new Error("User not found");
+        const data = await res.json();
+        setUserData(data);
+        setError(null);
+      } catch (error) {
+        console.error("Error searching user:", error);
+        setUserData(null);
+        setError("User not found");
+      }
+    };
+
+    if (username) {
+      fetchUserData();
     }
- };
+  }, [username]);
 
- const renderUserInformation = () => {
+  const renderUserInformation = () => {
     if (!userData) return null;
 
     // Filter out unwanted keys
@@ -37,9 +44,9 @@ const Task2 = () => {
         ))}
       </div>
     );
- };
+  };
 
- const renderPreferences = (prefs) => {
+  const renderPreferences = (prefs) => {
     return (
       <div style={{ display: "flex", flexWrap: "wrap", padding: "1.25rem", maxWidth: "100%", overflow: "auto" }}>
         {Object.entries(prefs).map(([prefKey, prefValue]) => (
@@ -49,19 +56,19 @@ const Task2 = () => {
         ))}
       </div>
     );
- };
+  };
 
- const renderKeyValue = (key, value) => {
+  const renderKeyValue = (key, value) => {
     return (
       <div key={key} style={{ margin: "0.5rem" }}>
         {key} : {typeof value === "object" ? renderPreferences(value) : value}
       </div>
     );
- };
+  };
 
- return (
+  return (
     <div style={{ width: "100%" }}>
-      <div style={{ display: "grid", justifyContent: "center", borderRadius: "1rem", width: "75%", paddingBottom: "2rem", margin: "0 auto" }}>
+      <div id="" style={{ display: "grid", justifyContent: "center", borderRadius: "1rem", width: "75%", paddingTop: "2rem", paddingBottom: "2rem", margin: "0 auto" }}>
         <div style={{ textAlign: "center", display: "flex", flexDirection: "column", backgroundColor: "#d1e7dd", borderRadius: "1rem", width: "75%", paddingBottom: "2rem" }}>
           <h1 style={{ fontWeight: "bold", fontSize: "2.25rem", margin: "1rem", paddingTop: "2rem" }}> Task 2</h1>
           <h1 style={{ fontWeight: "500", fontSize: "1.875rem", margin: "1rem" }}>Create a User Search Function</h1>
@@ -69,18 +76,9 @@ const Task2 = () => {
           <div style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
             <input
               placeholder="Enter Username Here"
-              className="rounded-full w-50 p-2 text-xl"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
             />
-            <div>
-              <button
-                className="rounded-full m-2 p-2 text-xl"
-                onClick={handleSearch}
-              >
-                Search
-              </button>
-            </div>
           </div>
         </div>
       </div>
@@ -88,11 +86,11 @@ const Task2 = () => {
         <h1 style={{ fontWeight: "bold", fontSize: "1.5rem", margin: "1rem", padding: "1rem", backgroundColor: "#e9d8fd", textAlign: "center", borderRadius: "1rem" }}>User Information</h1>
         <div style={{ fontWeight: "500", margin: "1rem", backgroundColor: "#add8e6", borderRadius: "1rem", padding: "1rem" }}>
           <div style={{ fontSize: "1.25rem", fontWeight: "500", textAlign: "center" }}>Displaying Search result</div>
-          {renderUserInformation()}
+          {error ? <p style={{ color: 'red', textAlign: 'center' }}>{error}</p> : renderUserInformation()}
         </div>
       </div>
     </div>
- );
+  );
 };
 
 export default Task2;
